@@ -7,31 +7,37 @@ typedef struct {
 }option_t;
 
 struct parser_ {
-    char ** arguments;
-    option_t ** options;
-    int opt_sz;
     int arg_sz;
+    char ** arguments;
+    int opt_sz;
+    option_t ** options;
 };
 
 parser_t * parser_init(void)
 {
     parser_t * new = malloc(sizeof(parser_t));
-    new->arguments = NULL;
-    new->options = NULL;
-    new->opt_sz = 0;
     new->arg_sz = 0;
+    new->arguments = NULL;
+    new->opt_sz = 0;
+    new->options = NULL;
     return new;
 }
 
 void parser_destroy(parser_t * parser)
 {
+    for (int i = 0; i < parser->opt_sz; i++)
+    {
+        free(parser->options[i]);
+    }
+    
+    free(parser->options);
     free(parser);
 }
 
 int parser_add_option(parser_t * parser, const char * opt, datatype type)
 {
     // TODO: Error handling
-    option_t * option = malloc(sizeof(option));
+    option_t * option = malloc(sizeof(option_t));
     option->type = type;
     option->opt = opt;
     
