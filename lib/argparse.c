@@ -24,7 +24,7 @@ struct parser_ {
 enum {OPT_SIZE = 53};
 
 static char * arg_string_get(parser_t * parser);
-static void option_set_invoked(parser_t * parser, char opt, char * optarg);
+static int option_set_invoked(parser_t * parser, char opt, char * optarg);
 static int get_index(char letter);
 
 parser_t * parser_init(void)
@@ -50,6 +50,12 @@ void parser_destroy(parser_t * parser)
     }
     
     free(parser->options);
+    
+    if (parser->arguments)
+    {
+        free(parser->arguments);
+    }
+    
     free(parser);
 }
 
@@ -92,11 +98,12 @@ int parser_parse_args(parser_t * parser, int argc, char ** argv)
     int opt = 0;
     char * arg_string = arg_string_get(parser);
     int rtr_flag = 0;
+    unsigned int opt_found = 0;
     while((opt = getopt(argc, argv, arg_string)) != -1)
     {
         if (isalpha(opt))
         {
-            option_set_invoked(parser, opt, optarg);
+            opt_found += option_set_invoked(parser, opt, optarg);
             continue;
         }
         
@@ -117,15 +124,24 @@ int parser_parse_args(parser_t * parser, int argc, char ** argv)
     
     free(arg_string);
     
-    for (; optind< argc; optind++)
+    if((parser->arg_sz = argc - (opt_found + 1)) == 0)
     {
-        printf("Extra arguments: %s\n", argv[optind]);
+        return rtr_flag;
     }
     
+    parser->arguments = malloc(sizeof(char *) * (parser->arg_sz + 1));
+    unsigned int arg_idx = 0;
+    
+    for (; optind< argc; optind++)
+    {
+        parser->arguments[arg_idx++] = argv[optind];
+    }
+    
+    parser->arguments[arg_idx] = NULL;
     return rtr_flag;
 }
 
-bool option_check_invoked(parser_t * parser, char opt)
+bool parser_opt_invoked(parser_t * parser, char opt)
 {
     int idx = get_index(opt);
     
@@ -139,7 +155,7 @@ bool option_check_invoked(parser_t * parser, char opt)
     }
 }
 
-char * option_get_argument(parser_t * parser, char opt)
+char * parser_get_optarg(parser_t * parser, char opt)
 {
     int idx = get_index(opt);
     
@@ -157,6 +173,11 @@ char * option_get_argument(parser_t * parser, char opt)
     {
         return NULL;
     }
+}
+
+char ** parser_get_arguments(parser_t * parser)
+{
+    return parser->arguments;
 }
 
 static char * arg_string_get(parser_t * parser)
@@ -178,15 +199,19 @@ static char * arg_string_get(parser_t * parser)
     return arg_string;
 }
 
-static void option_set_invoked(parser_t * parser, char opt, char * optarg)
+static int option_set_invoked(parser_t * parser, char opt, char * optarg)
 {
     int index = get_index(opt);
+    int arg_amount = 1;
     option_t * option = parser->options[index];
     option->invoked = true;
     if (optarg)
     {
         option->optarg = optarg;
+        arg_amount++;
     }
+    
+    return arg_amount;
 }
 
 static int get_index(char letter)
