@@ -3,7 +3,6 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
-#include <stdbool.h>
 #include <ctype.h>
 
 typedef struct {
@@ -92,13 +91,12 @@ int parser_parse_args(parser_t * parser, int argc, char ** argv)
 {
     int opt = 0;
     char * arg_string = arg_string_get(parser);
-    printf("%s\n", arg_string);
     int rtr_flag = 0;
     while((opt = getopt(argc, argv, arg_string)) != -1)
     {
         if (isalpha(opt))
         {
-            printf("%c\n", opt);
+            option_set_invoked(parser, opt, optarg);
             continue;
         }
         
@@ -118,7 +116,47 @@ int parser_parse_args(parser_t * parser, int argc, char ** argv)
     }
     
     free(arg_string);
+    
+    for (; optind< argc; optind++)
+    {
+        printf("Extra arguments: %s\n", argv[optind]);
+    }
+    
     return rtr_flag;
+}
+
+bool option_check_invoked(parser_t * parser, char opt)
+{
+    int idx = get_index(opt);
+    
+    if (parser->options[idx] == NULL)
+    {
+        return -1;
+    }
+    else
+    {
+        return parser->options[idx]->invoked;
+    }
+}
+
+char * option_get_argument(parser_t * parser, char opt)
+{
+    int idx = get_index(opt);
+    
+    if (parser->options[idx] == NULL)
+    {
+        return NULL;
+    }
+    
+    
+    if (parser->options[idx]->invoked && parser->options[idx]->optarg)
+    {
+        return parser->options[idx]->optarg;
+    }
+    else 
+    {
+        return NULL;
+    }
 }
 
 static char * arg_string_get(parser_t * parser)
