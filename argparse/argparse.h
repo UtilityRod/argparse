@@ -1,10 +1,14 @@
 #ifndef _ARGPARSE_H_
 #define _ARGPARSE_H_
 
+#include <sys/types.h>
+
 typedef struct parser parser_t;
-typedef enum {INT, STR} datatype;
+
+typedef enum { PARSER_NULL = -1, LIST_NULL = -2, INVALID_OPT = -3 } error_t;
 
 parser_t * parser_create(void);
 void parser_destroy(parser_t * parser);
+ssize_t parser_add_option(parser_t * parser, char opt);
 
 #endif

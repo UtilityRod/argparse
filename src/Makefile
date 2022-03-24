@@ -7,4 +7,4 @@ all: $(objects)
 $(objects): %.o: %.c
 
 %.o:
-	$(CC) $(CFLAGS) $(INCLUDE) -o ../obj/$@ -c $^
+	$(CC) $(CFLAGS) $(INCLUDE) -o $(obj_path)$@ -c $^
