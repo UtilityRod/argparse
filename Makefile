@@ -1,26 +1,28 @@
-CFLAGS += -Wall -Wextra -Wpedantic -Waggregate-return -Wwrite-strings -Wvla -Wfloat-equal
-CFLAGS += -I./include/
+CFLAGS = -Wall -Wextra -Wpedantic -Waggregate-return -Wwrite-strings -Wvla -Wfloat-equal
+INCLUDE = -I../include/ -I../argparse/
+export CFLAGS
+export INCLUDE
+
 
 .PHONY: all
-all: main
+all: argparse src main
 
-main: main.o argparse.a
-	$(CC) $(CFLAGS) -o main ./obj/main.o ./bin/argparse.a
-	
-main.o: ./src/main.c
-	$(CC) $(CFLAGS) -c ./src/main.c -o ./obj/main.o
-	
-argparse.a: argparse.o
-argparse.a: ./bin/argparse.a(./obj/argparse.o)
+main:
+	$(CC) $(CFLAGS) -o main ./obj/argparse.o ./obj/main.o
 
-argparse.o: ./lib/argparse.c
-	$(CC) $(CFLAGS) -c ./lib/argparse.c -o ./obj/argparse.o
+.PHONY: src
+src:
+	$(MAKE) -C ./src/
+
+.PHONY: argparse
+argparse:
+	$(MAKE) -C ./argparse
+	
+.PHONY: debug
+debug: CFLAGS += -g
+debug: clean
+debug: all
 
 .PHONY: clean
 clean:
-	$(RM) ./obj/*.o main ./bin/argparse.a
-	
-.PHONY: debug
-debug: clean
-debug: CFLAGS += -g
-debug: all
+	$(RM) ./obj/*.o main
