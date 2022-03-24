@@ -81,7 +81,10 @@ static int options_compare(const void * arg1, const void * arg2)
 static void options_destroy(void * arg)
 {
     option_t * option = (option_t *)arg;
-    free(option->arg);
+    if (option->arg != NULL)
+    {
+        free(option->arg);
+    }
     free(option);
 }
 // END OF SOURCE
