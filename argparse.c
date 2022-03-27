@@ -93,7 +93,6 @@ int parse_args(parser_t * parser, int argc, char ** argv)
             option_t search_option = {.opt = optopt};
             if (circular_search(parser->options_list, &search_option) == NULL)
             {
-                printf("Unknown option: %c\n", optopt);
                 free(options);
                 return INVALID_OPT;
             }
