@@ -1,30 +1,15 @@
-CFLAGS = -Wall -Wextra -Wpedantic -Waggregate-return -Wwrite-strings -Wvla -Wfloat-equal
-INCLUDE = -I../include/ -I../argparse/
-obj_path := $(dir $(abspath ./obj/.gitkeep))
-export CFLAGS
-export INCLUDE
-export obj_path
-
+sources := $(wildcard *.c)
+objects := $(patsubst %.c, %.o, $(sources))
+INCLUDE += -I./linked_list
 
 .PHONY: all
-all: argparse src main
+all: linked_list $(objects)
 
-main:
-	$(CC) $(CFLAGS) -o main $(wildcard ./obj/*.o)
+.PHONY: linked_list
+linked_list:
+	$(MAKE) -C ./linked_list
 
-.PHONY: src
-src:
-	$(MAKE) -C ./src/
+$(objects): %.o: %.c
 
-.PHONY: argparse
-argparse:
-	$(MAKE) -C ./argparse
-	
-.PHONY: debug
-debug: CFLAGS += -g
-debug: clean
-debug: all
-
-.PHONY: clean
-clean:
-	$(RM) ./obj/*.o main
+%.o:
+	$(CC) $(CFLAGS) $(INCLUDE) -o $(obj_path)$@ -c $^
